@@ -1,91 +1,103 @@
-import { Navigate } from "react-router-dom"
-import { Container, Table, Spinner } from 'react-bootstrap';
-import Sbutton from "../../components/Button"
-import SBreadcrumb from "../../components/Breadcrumb"
-import SNavbar from "../../components/Navbar"
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { config } from '../../configs'
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from 'react';
+import { Container } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import SBreadCrumb from '../../components/Breadcrumb';
+import Button from '../../components/Button';
+import STable from '../../components/TableWithAction';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchCategories } from '../../redux/categories/actions';
+// import SAlert from '../../components/Alert';
+// import Swal from 'sweetalert2';
+// import { deleteData } from '../../utils/fetch';
+// import { setNotif } from '../../redux/notif/actions';
+import { accessCategories } from '../../const/access';
 
-export default function PageCategories() {
-    const navigate = useNavigate()
-    const token = localStorage.getItem('token')
+function Categories() {
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
 
-    const [data, setData] = useState([])
-    const [isLoading, setIsLoading] = useState(false)
+    // const notif = useSelector((state) => state.notif);
+    const categories = useSelector((state) => state.categories);
+    const [access, setAccess] = useState({
+        tambah: false,
+        hapus: false,
+        edit: false,
+    });
 
+    const checkAccess = () => {
+        let { role } = localStorage.getItem('auth')
+            ? JSON.parse(localStorage.getItem('auth'))
+            : {};
+        const access = { tambah: false, hapus: false, edit: false };
+        Object.keys(accessCategories).forEach(function (key) {
+            if (accessCategories[key].indexOf(role) >= 0) {
+                access[key] = true;
+            }
+        });
+        setAccess(access);
+    };
 
-    const getCategoriesAPI = async () => {
-        setIsLoading(true)
-        try {
-            const res = await axios.get(`${config.api_host_dev}/cms/categories`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-
-            setTimeout(() => {
-                setIsLoading(false)
-
-                setData(res.data.data)
-            }, 1000)
-
-        } catch (err) {
-            setIsLoading(false)
-            console.log(err)
-        }
-    }
     useEffect(() => {
-        getCategoriesAPI()
-    }, [])
-    if (!token) {
-        return <Navigate to={'/signin'} replace={true} />
-    }
+        checkAccess();
+    }, []);
+
+    useEffect(() => {
+        dispatch(fetchCategories());
+    }, [dispatch]);
+
+    const handleDelete = (id) => {
+        // Swal.fire({
+        //     title: 'Apa kamu yakin?',
+        //     text: 'Anda tidak akan dapat mengembalikan ini!',
+        //     icon: 'warning',
+        //     showCancelButton: true,
+        //     confirmButtonColor: '#3085d6',
+        //     cancelButtonColor: '#d33',
+        //     confirmButtonText: 'Iya, Hapus',
+        //     cancelButtonText: 'Batal',
+        // }).then(async (result) => {
+        //     if (result.isConfirmed) {
+        //         const res = await deleteData(`/cms/categories/${id}`);
+        //         dispatch(
+        //             setNotif(
+        //                 true,
+        //                 'success',
+        //                 `berhasil hapus kategori ${res.data.data.name}`
+        //             )
+        //         );
+        //         dispatch(fetchCategories());
+        //     }
+        // });
+    };
 
     return (
-        <>
-            <SNavbar />
-            <Container >
-                <SBreadcrumb textSecond={'Categories'} />
-                <Sbutton action={() => navigate('/categories/create')}>Tambah Data</Sbutton>
+        <Container className='mt-3'>
+            <SBreadCrumb textSecound={'Categories'} />
 
-                <Table className="mt-3" striped bordered hover variant="dark">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Log</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {isLoading ? (
-                            <tr>
-                                <td colSpan={3} style={{ textAlign: 'center' }}>
-                                    <div className="flex items-center justify-center">
-                                        <Spinner animation="grow" variant="light" />
-                                    </div>
-                                </td>
-                            </tr>
-                        ) : (
-                            data.map((data, index) => {
-                                return (
-                                    <tr key={index}>
-                                        <td>{(index + 1)}</td>
-                                        <td>{data.name}</td>
-                                        <td>Otto</td>
-                                    </tr>
-                                )
+            {access.tambah && (
+                <Button
+                    className={'mb-3'}
+                    action={() => navigate('/categories/create')}
+                >
+                    Tambah
+                </Button>
+            )}
 
-                            })
-                        )}
+            {/* {notif.status && (
+                <SAlert type={notif.typeNotif} message={notif.message} />
+            )} */}
 
-
-
-
-                    </tbody>
-                </Table>
-            </Container>
-        </>
-    )
+            <STable
+                status={categories.status}
+                thead={['Nama', 'Aksi']}
+                data={categories.data}
+                tbody={['name']}
+                editUrl={access.edit ? `/categories/edit` : null}
+                deleteAction={access.hapus ? (id) => handleDelete(id) : null}
+                withoutPagination
+            />
+        </Container>
+    );
 }
+
+export default Categories;

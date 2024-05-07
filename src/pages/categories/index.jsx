@@ -6,17 +6,17 @@ import Button from '../../components/Button';
 import STable from '../../components/TableWithAction';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchCategories } from '../../redux/categories/actions';
-// import SAlert from '../../components/Alert';
+import SAlert from '../../components/Alert';
 // import Swal from 'sweetalert2';
 // import { deleteData } from '../../utils/fetch';
-// import { setNotif } from '../../redux/notif/actions';
+import { setNotif } from '../../redux/notif/actions';
 import { accessCategories } from '../../const/access';
 
 function Categories() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    // const notif = useSelector((state) => state.notif);
+    const notif = useSelector((state) => state.notif);
     const categories = useSelector((state) => state.categories);
     const [access, setAccess] = useState({
         tambah: false,
@@ -72,7 +72,7 @@ function Categories() {
 
     return (
         <Container className='mt-3'>
-            <SBreadCrumb textSecound={'Categories'} />
+            <SBreadCrumb textSecond={'Categories'} />
 
             {access.tambah && (
                 <Button
@@ -83,9 +83,9 @@ function Categories() {
                 </Button>
             )}
 
-            {/* {notif.status && (
+            {notif.status && (
                 <SAlert type={notif.typeNotif} message={notif.message} />
-            )} */}
+            )}
 
             <STable
                 status={categories.status}

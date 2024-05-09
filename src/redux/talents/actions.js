@@ -5,7 +5,6 @@ import debounce from "debounce-promise";
 import { clearNotif } from "../notif/actions";
 
 let debouncedFetchTalents = debounce(getData, 1000);
-console.log(debouncedFetchTalents, "aa");
 
 export const startFetchingTalents = () => {
   return {

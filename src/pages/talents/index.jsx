@@ -24,6 +24,7 @@ function TalentsPage() {
         hapus: false,
         edit: false,
     });
+   
 
     const checkAccess = () => {
         let { role } = localStorage.getItem('auth')
@@ -75,7 +76,7 @@ function TalentsPage() {
 
     return (
         <Container className='mt-3'>
-            <BreadCrumb textSecound={'Talents'} />
+            <BreadCrumb textSecond={'Talents'} />
             {access.tambah && (
                 <div className='mb-3'>
                     <Button action={() => navigate('/talents/create')}>Tambah</Button>
